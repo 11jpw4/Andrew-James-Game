@@ -33,8 +33,7 @@ class GameMap:
         each representing one layer of the game world.
     
     ----tile-legend----
-    #-terrain 1...coord
-    # 
+    #(-1,-1) is an empty foreground tile
     
     
     
@@ -48,13 +47,12 @@ class GameMap:
         #redraws the entire map, blitting over players
         for i in range(DIMENSIONS[0]):
             for j in range(DIMENSIONS[1]):
-                draw_image_to_coord(self.background_layer[i][j], (i,j))
-                draw_image_to_coord(self.foreground_layer[i][j], (i,j))
+                self.draw_tile((i,j))
         
     def draw_tile(self,coordinate):
         #redraws the a single tile, blitting over players
         draw_image_to_coord(self.background_layer[coordinate[0]][coordinate[1]], coordinate)
-        draw_image_to_coord(self.foreground_layer[coordinate[0]][coordinate[1]], coordinate)
+        if self.foreground_layer[coordinate[0]][coordinate[1]] != (-1,-1): draw_image_to_coord (self.foreground_layer[coordinate[0]][coordinate[1]], coordinate)
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
