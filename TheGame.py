@@ -57,6 +57,7 @@ class GameMap:
     def __init__(self):
         self.background_layer= np.array([[(5,0)]*40]*40)   
         self.foreground_layer= np.array([[(-1,-1)]*40]*40)
+        self.interactive_layer= np.array([[((-1,-1),ss)]*40]*40) #interactive layer also specifies spritesheet
         listTrees = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
         listWater = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)]
         listWaterUpEdge = [(5,31),(6,31),(7,31)]
@@ -98,8 +99,9 @@ class GameMap:
         
     def draw_tile(self,coordinate):
         #redraws the a single tile, blitting over players
-        draw_image_to_coord(self.background_layer[coordinate[0]][coordinate[1]], coordinate)
-        if self.foreground_layer[coordinate[0]][coordinate[1]][0] != -1: draw_image_to_coord (self.foreground_layer[coordinate[0]][coordinate[1]], coordinate)
+        draw_image_to_coord(self.background_layer[coordinate], coordinate)
+        if self.foreground_layer[coordinate][0] != -1: draw_image_to_coord (self.foreground_layer[coordinate[0]][coordinate[1]], coordinate)
+        if self.interactive_layer[coordinate][0][0] != -1: draw_image_to_coord (self.foreground_layer[coordinate][0], coordinate,images_list=self.foreground_layer[coordinate][1])
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
@@ -138,6 +140,15 @@ class Player:
     def draw_player(self):
         #draw the player and all their items        
         draw_image_to_coord((0, self.appearance[0]), self.location, images_list=char_images) # draw the body
+    
+    def interact(self,game_map):
+        #interact with the map
+        for direction in [(i,j) for i in range(-1,2) for j in range(-1,2)]:
+        
+            object= game_map.interactive_layer[add_coords(self.location,direction)]
+            if object == (5,5): #example
+                self.item+=5
+                
         
 class StatusBar:
     def __init__(self,player1_hp,player2_hp):
@@ -167,16 +178,16 @@ class StatusBar:
             
             
         # player2  ----------------------------------------      
-        if self.player1_hp > 0 :
+        if self.player2_hp > 0 :
             draw_image_to_coord((34,29), (34,41))
         else: 
             draw_image_to_coord((34,30), (34,41))
         for i in range(1,10):
-            if self.player1_hp > i:
+            if self.player2_hp > i:
                 draw_image_to_coord((31,29), (34-i,41))
             else:
                 draw_image_to_coord((31,30), (34-i,41))
-        if self.player1_hp == 10 :
+        if self.player2_hp == 10 :
             draw_image_to_coord((33,29), (24,41))
         else: 
             draw_image_to_coord((33,30), (24,41))
