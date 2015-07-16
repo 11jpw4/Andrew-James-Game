@@ -17,11 +17,11 @@ import os # for paths
 '''
 
 DIMENSIONS=(40,40) 
-SURFACE = pygame.display.set_mode((16*DIMENSIONS[0],16*DIMENSIONS[1])) # each tile is 16 pixels wide
+SURFACE = pygame.display.set_mode((16*DIMENSIONS[0],16*DIMENSIONS[1]+32)) # each tile is 16 pixels wide additionally two tiles are used for the HUD at the bottom
 
 #this is everything I could have ever asked for and more
 
-FPS = 60
+FPS = 30
 clock = pygame.time.Clock()
 SURFACE.fill(pygame.Color('black'))
 
@@ -29,18 +29,20 @@ ss = spritesheet(os.path.join('spritesheet/roguelikeSheet_transparent.png'))
 char_ss = spritesheet(os.path.join('spritesheet/roguelikeChar_transparent.png'))
 # Sprite is 16x16 pixels at location 0,0 in the file...
 # Load  images into an array, their transparent bit is (255, 255, 255)
-images = [ss.images_at([(17*j, 17*i, 16,16) for i in range(57)],colorkey=(255, 255, 255)) for j in range(36)]
-char_images = [char_ss.images_at([(17*j, 17*i, 16,16) for i in range(54)],colorkey=(255, 255, 255)) for j in range(12)]
+images = [ss.images_at([(17*j, 17*i, 16,16) for i in range(36)],colorkey=(255, 255, 255)) for j in range(57)]
+char_images = [char_ss.images_at([(17*j, 17*i, 16,16) for i in range(12)],colorkey=(255, 255, 255)) for j in range(54)]
 
 
 
 def main():
     game_map=GameMap()
-    print game_map
-    player1=Player(location=(2,2),appearance=(0,0,0,0,0,0))
-    player2=Player(location=(10,30),appearance=(2,0,0,0,0,0))
+    
+    player1=Player(location=(2,2),appearance=(0,0,0,0,0,0),id=1)
+    player2=Player(location=(10,30),appearance=(2,0,0,0,0,0),id=2)
     players=[player1,player2]
-    game_loop(game_map,players)
+    
+    status_bar=StatusBar(player1.health,player2.health)
+    game_loop(game_map,players,status_bar)
     
 
 class GameMap:
@@ -50,9 +52,7 @@ class GameMap:
     ----tile-legend----
     #(-1,-1) is an empty foreground tile
     
-    
-    
-    
+     
     '''
     def __init__(self):
         self.background_layer= np.array([[(5,0)]*40]*40)   
@@ -81,7 +81,7 @@ class GameMap:
         return True
     
 class Player:
-    def __init__(self,location,appearance):
+    def __init__(self,location,appearance,id):
         self.location=location
         self.appearance= appearance
         ''' appearance is a length 6 tuple
@@ -92,17 +92,17 @@ class Player:
             beard type:
         '''
         self.health=10
+        self.id= id
         self.item=[]
     
-    def move(self,direction,distance,game_map):
+    def move(self,direction,distance,game_map,players):
         #moves the player in the direction desired if possible
         #direction is a tuple either (1,0),(-1,0),(0,1) or (0,-1)
         for _ in range(distance):   
-            
-            if game_map.is_passable(add_coords(self.location,direction)):
+            destination=add_coords(self.location,direction)
+            if game_map.is_passable(destination) and  players[not(self.id-1)].location!=destination: #check to see if movement is valid
                 game_map.draw_tile(self.location)
                 self.location = add_coords(self.location,direction)
-                self.draw_player()
             else:
                 #break out of the loop if the player encounters an obstacle 
                 break
@@ -110,6 +110,48 @@ class Player:
     def draw_player(self):
         #draw the player and all their items        
         draw_image_to_coord((0, self.appearance[0]), self.location, images_list=char_images) # draw the body
+        
+class StatusBar:
+    def __init__(self,player1_hp,player2_hp):
+        self.player1_hp=player1_hp
+        self.player2_hp=player2_hp
+        
+    def draw_all(self):
+        # updates the status bar at the bottom of the screen
+        for i in range(40): #paint a background
+            draw_image_to_coord((45,26), (i,40))
+            draw_image_to_coord((45,26), (i,41))
+        
+        # player1  ----------------------------------------      
+        if self.player1_hp > 0 :
+            draw_image_to_coord((33,27), (5,41))
+        else: 
+            draw_image_to_coord((33,28), (5,41))
+        for i in range(1,10):
+            if self.player1_hp > i:
+                draw_image_to_coord((31,27), (5+i,41))
+            else:
+                draw_image_to_coord((31,28), (5+i,41))
+        if self.player1_hp == 10 :
+            draw_image_to_coord((34,27), (15,41))
+        else: 
+            draw_image_to_coord((34,28), (15,41))
+            
+            
+        # player2  ----------------------------------------      
+        if self.player1_hp > 0 :
+            draw_image_to_coord((34,29), (34,41))
+        else: 
+            draw_image_to_coord((34,30), (34,41))
+        for i in range(1,10):
+            if self.player1_hp > i:
+                draw_image_to_coord((31,29), (34-i,41))
+            else:
+                draw_image_to_coord((31,30), (34-i,41))
+        if self.player1_hp == 10 :
+            draw_image_to_coord((33,29), (24,41))
+        else: 
+            draw_image_to_coord((33,30), (24,41))
         
         
 
@@ -126,11 +168,10 @@ def draw_image_to_coord(img_location, draw_location, images_list=images):
     SURFACE.blit(images_list[img_location[0]][img_location[1]], blit_location)
 
 
-def game_loop(game_map,players):   
+def game_loop(game_map,players,status_bar):   
     #this function contain the main game loop
     game_map.draw_all()
-    for player in players: 
-        player.draw_player()
+    status_bar.draw_all()
     while True:
     # this is the main game loop
         
@@ -147,7 +188,7 @@ def game_loop(game_map,players):
             elif keys[pygame.K_DOWN]: direction= (0,1)
             elif keys[pygame.K_RIGHT]: direction= (1,0)
             elif keys[pygame.K_LEFT]: direction= (-1,0)
-            players[0].move(direction,1,game_map)
+            players[0].move(direction,1,game_map,players)
             
             
         if keys[pygame.K_a] or keys[pygame.K_d] or keys[pygame.K_s] or keys[pygame.K_w]:
@@ -156,7 +197,12 @@ def game_loop(game_map,players):
             elif keys[pygame.K_s]: direction= (0,1)
             elif keys[pygame.K_d]: direction= (1,0)
             elif keys[pygame.K_a]: direction= (-1,0)
-            players[1].move(direction,1,game_map)
+            players[1].move(direction,1,game_map,players)
+            
+        
+        for player in players: 
+            #redraw the players each frame
+            player.draw_player()
         
         pygame.display.flip() # this draws all the updates to the screen
         clock.tick(FPS) 
