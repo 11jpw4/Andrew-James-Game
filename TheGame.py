@@ -55,8 +55,15 @@ class GameMap:
     
     '''
     def __init__(self):
-        self.background_layer= np.array([[(0,0)]*40]*40)   
-        self.foreground_layer= np.array([[(14,5)]*40]*40)
+        self.background_layer= np.array([[(0,5)]*40]*40)   
+        self.foreground_layer= np.array([[(-1,-1)]*40]*40)
+        list1 = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
+        for i,j in list1:
+        	self.foreground_layer[i][j]=(13,9)
+
+
+
+
     
     def draw_all(self):
         #redraws the entire map, blitting over players
