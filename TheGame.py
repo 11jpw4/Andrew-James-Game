@@ -123,8 +123,24 @@ class Player:
         '''
         self.health=10
         self.id= id
-        self.item=[]
-    
+        self.item= 0
+   
+	def damage(self, players, status_bar):
+		other_player = players[not(self.id-1)]
+		if self.item:
+			x_dis = abs(other_player.location[0] - self.location[0])
+			y_dis = abs(other_player.location[1] - self.location[1])
+			if x_dis + y_dis <= 4:
+				self.item -= 1
+				other_player.health -= 1
+				update_values()
+				status_bar.draw_all()
+
+
+
+
+		status_bar.player1_hp = draw_all
+
     def move(self,direction,distance,game_map,players):
         #moves the player in the direction desired if possible
         #direction is a tuple either (1,0),(-1,0),(0,1) or (0,-1)
@@ -154,7 +170,11 @@ class StatusBar:
     def __init__(self,player1_hp,player2_hp):
         self.player1_hp=player1_hp
         self.player2_hp=player2_hp
-        
+
+    def update_values(self, players):
+    	self.player1_hp=player1_hp
+        self.player2_hp=player2_hp
+
     def draw_all(self):
         # updates the status bar at the bottom of the screen
         for i in range(40): #paint a background
