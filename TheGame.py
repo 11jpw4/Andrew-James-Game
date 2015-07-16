@@ -42,7 +42,7 @@ def main():
     player2=Player(location=(10,30),appearance=(2,0,0,0,0,0),id=2)
     players=[player1,player2]
     
-    status_bar=StatusBar(player1.health,player2.health)
+    status_bar=StatusBar(players)
     game_loop(game_map,players,status_bar)
     
 
@@ -110,20 +110,24 @@ class GameMap:
             else:
                 draw_image_to_coord (self.interactive_layer[coordinate][0], coordinate,images_list=char_images)
     
-    def interation_logic(self,coordinate,object_code,player):
+    def interation_logic(self,coordinate,object_code,player,players,status_bar):
         #this might get tricky
         if object_code==((47,1),1):
+            #be careful when updating this due to the way cycling of spawn locations is done
             axe_spawns=[(20,20),(35,30),(2,38) ] #MAP_PARAMS
             
             self.interactive_layer[coordinate]=((-1,-1),0)
             self.draw_tile(coordinate)
             current_spawn= axe_spawns.index(coordinate)
-            new_spawn=axe_spawns[current_spawn+random.randint(1,2)]
+            new_spawn=axe_spawns[(current_spawn+random.randint(1,2))%3]
             self.interactive_layer[new_spawn]=((47,1),1)
+            
             self.draw_tile(new_spawn)
             player.item+=2
             if player.item >5:
                 player.item =5
+            status_bar.update_values(players)
+            status_bar.draw_all()
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
@@ -147,7 +151,7 @@ class Player:
         self.id= id
         self.item= 0
    
-	def damage(self, players, status_bar):
+    def damage(self, players, status_bar):
 		other_player = players[not(self.id-1)]
 		if self.item:
 			x_dis = abs(other_player.location[0] - self.location[0])
@@ -155,13 +159,10 @@ class Player:
 			if x_dis + y_dis <= 4:
 				self.item -= 1
 				other_player.health -= 1
-				update_values()
+				status_bar.update_values(players)
 				status_bar.draw_all()
 
 
-
-
-		status_bar.player1_hp = draw_all
 
     def move(self,direction,distance,game_map,players):
         #moves the player in the direction desired if possible
@@ -179,12 +180,12 @@ class Player:
         #draw the player and all their items        
         draw_image_to_coord((0, self.appearance[0]), self.location, images_list=char_images) # draw the body
     
-    def interact(self,game_map):
+    def interact(self,game_map,status_bar,players):
         #interact with the map
         for direction in [(i,j) for i in range(-1,2) for j in range(-1,2)]:
             coordinate=add_coords(self.location,direction)
             object= tuple(game_map.interactive_layer[coordinate])
-            game_map.interation_logic(coordinate,object,self)
+            game_map.interation_logic(coordinate,object,self,players,status_bar)
         print self.item, "item amount"    
                 
                 
@@ -192,13 +193,18 @@ class Player:
                 
         
 class StatusBar:
-    def __init__(self,player1_hp,player2_hp):
-        self.player1_hp=player1_hp
-        self.player2_hp=player2_hp
+    def __init__(self,players):
+        self.update_values(players)
+
+
+        
 
     def update_values(self, players):
-    	self.player1_hp=player1_hp
-        self.player2_hp=player2_hp
+    	self.player1_hp=players[0].health
+        self.player2_hp=players[1].health
+        self.item_durability1=players[0].item
+        self.item_durability2=players[1].item
+        
 
     def draw_all(self):
         # updates the status bar at the bottom of the screen
@@ -207,37 +213,67 @@ class StatusBar:
             draw_image_to_coord((45,26), (i,41))
         
         # player1  ----------------------------------------      
+            #--- health bar ----
         if self.player1_hp > 0 :
-            draw_image_to_coord((33,27), (5,41))
+            draw_image_to_coord((33,25), (5,41))
         else: 
-            draw_image_to_coord((33,28), (5,41))
-        for i in range(1,10):
-            if self.player1_hp > i:
-                draw_image_to_coord((31,27), (5+i,41))
+            draw_image_to_coord((33,26), (5,41))
+        for i in range(2,10):
+            if self.player1_hp >= i:
+                draw_image_to_coord((31,25), (4+i,41))
             else:
-                draw_image_to_coord((31,28), (5+i,41))
+                draw_image_to_coord((31,26), (4+i,41))
         if self.player1_hp == 10 :
-            draw_image_to_coord((34,27), (15,41))
+            draw_image_to_coord((34,25), (14,41))
         else: 
-            draw_image_to_coord((34,28), (15,41))
-            
-            
-        # player2  ----------------------------------------      
-        if self.player2_hp > 0 :
-            draw_image_to_coord((34,29), (34,41))
+            draw_image_to_coord((34,26), (14,41))
+        
+            #--- item bar ----
+        if self.item_durability1 > 0 :
+            draw_image_to_coord((33,29), (5,40))
         else: 
-            draw_image_to_coord((34,30), (34,41))
-        for i in range(1,10):
-            if self.player2_hp > i:
-                draw_image_to_coord((31,29), (34-i,41))
+            draw_image_to_coord((33,30), (5,40))
+        for i in range(2,5):
+            if self.item_durability1 >= i:
+                draw_image_to_coord((31,29), (4+i,40))
             else:
-                draw_image_to_coord((31,30), (34-i,41))
-        if self.player2_hp == 10 :
-            draw_image_to_coord((33,29), (24,41))
+                draw_image_to_coord((31,30), (4+i,40))
+        if self.item_durability1 == 5 :
+            draw_image_to_coord((34,29), (9,40))
         else: 
-            draw_image_to_coord((33,30), (24,41))
+            draw_image_to_coord((34,30), (9,40))
+
         
+        # player2  ----------------------------------------      
+            #--- health bar ----
+        if self.player2_hp > 0 :
+            draw_image_to_coord((34,25), (34,41))
+        else: 
+            draw_image_to_coord((34,26), (34,41))
+        for i in range(2,10):
+            if self.player2_hp >= i:
+                draw_image_to_coord((31,25), (35-i,41))
+            else:
+                draw_image_to_coord((31,26), (35-i,41))
+        if self.player2_hp == 10 :
+            draw_image_to_coord((33,25), (25,41))
+        else: 
+            draw_image_to_coord((33,26), (25,41))
         
+            #--- item bar ----
+        if self.item_durability2 > 0 :
+            draw_image_to_coord((34,29), (34,40))
+        else: 
+            draw_image_to_coord((34,30), (34,40))
+        for i in range(2,5):
+            if self.item_durability2 >= i:
+                draw_image_to_coord((31,29), (35-i,40))
+            else:
+                draw_image_to_coord((31,30), (35-i,40))
+        if self.item_durability2 == 5 :
+            draw_image_to_coord((33,29), (30,40))
+        else: 
+            draw_image_to_coord((33,30), (30,40))
 
 def add_coords(coord1,coord2):
     # adds two tuples of coordinates together keeping in mind map wrapping, returns a tuple
@@ -285,19 +321,20 @@ def game_loop(game_map,players,status_bar):
 
         if keys[pygame.K_SLASH]:
         	#player1's interact
-        	players[0].interact(game_map)
+        	players[0].interact(game_map,status_bar,players)
 
         if keys[pygame.K_q]:
         	#player2's interact
-        	players[1].interact(game_map)
+        	players[1].interact(game_map,status_bar,players)
 
         if keys[pygame.K_GREATER]:
         	#player1's attack
-        	players[0].damage()
+            print "sdasd"
+            players[0].damage(players, status_bar)
 
         if keys[pygame.K_1]:
         	#player2's attack
-        	players[1].damage()
+        	players[1].damage(players, status_bar)
 
 
             
