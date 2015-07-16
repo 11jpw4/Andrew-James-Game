@@ -5,6 +5,7 @@ from pygame.locals import *
 from utilities.spritesheet import spritesheet # for loading the spritesheet
 import os # for paths
 
+
 DIMENSIONS=(40,40) 
 SURFACE = pygame.display.set_mode((16*DIMENSIONS[0],16*DIMENSIONS[1])) # each tile is 16 pixels wide
 
@@ -44,11 +45,49 @@ class GameMap:
         self.foreground_layer= np.array([[(14,5)]*40]*40)
     
     def draw_all(self):
+        #redraws the entire map, blitting over players
         for i in range(DIMENSIONS[0]):
             for j in range(DIMENSIONS[1]):
                 draw_image_to_coord(self.background_layer[i][j], (i,j))
                 draw_image_to_coord(self.foreground_layer[i][j], (i,j))
+        
+    def draw_tile(self,coordinate):
+        #redraws the a single tile, blitting over players
+        draw_image_to_coord(self.background_layer[coordinate[0]][coordinate[1]], coordinate)
+        draw_image_to_coord(self.foreground_layer[coordinate[0]][coordinate[1]], coordinate)
     
+    def is_passable(self,coordinate):
+        #tests to see if the tile in question is passable
+        return True
+    
+class Player:
+    def __init__(self,location):
+        self.location=location
+        self.health=10
+        self.item=0
+    
+    def move(self,direction,distance,game_map):
+        #moves the player in the direction desired if possible
+        #direction is a tuple either (1,0),(-1,0),(0,1) or (0,-1)
+        for _ in range(distance):   
+            
+            if game_map.is_passable(add_coords(self.location,direction)):
+                game_map.draw_tile(self,coordinate)
+                self.location = add_coords(self.location,direction)
+                self.draw_player()
+            else:
+                #break out of the loop if the player encounters an obstacle 
+                break
+                
+    def draw_player(self):
+        pass
+        
+        
+
+def add_coords(coord1,coord2):
+    # adds two tuples of coordinates together keeping in mind map wrapping, returns a tuple
+    return ((coord1[0]+coord2[0])%DIMENSIONS[0],(coord1[1]+coord2[1])%DIMENSIONS[1])
+        
 def draw_image_to_coord(img_location, draw_location):
     '''Takes as input two tuple, this first being the location on the spritesheet of the image
     The second tuple is the coordinate of the location where the image should be blitted to on the screen
