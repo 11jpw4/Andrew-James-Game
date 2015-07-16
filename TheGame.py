@@ -110,15 +110,20 @@ class GameMap:
             else:
                 draw_image_to_coord (self.interactive_layer[coordinate][0], coordinate,images_list=char_images)
     
-    def interation_logic(self,coordinate,object_code):
+    def interation_logic(self,coordinate,object_code,player):
         #this might get tricky
         if object_code==((47,1),1):
             axe_spawns=[(20,20),(35,30),(2,38) ] #MAP_PARAMS
-            self.draw_tile(coordinate)
+            
             self.interactive_layer[coordinate]=((-1,-1),0)
-            new_spawn=random.choice(axe_spawns)
+            self.draw_tile(coordinate)
+            current_spawn= axe_spawns.index(coordinate)
+            new_spawn=axe_spawns[current_spawn+random.randint(1,2)]
             self.interactive_layer[new_spawn]=((47,1),1)
             self.draw_tile(new_spawn)
+            player.item+=2
+            if player.item >5:
+                player.item =5
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
@@ -177,12 +182,12 @@ class Player:
     def interact(self,game_map):
         #interact with the map
         for direction in [(i,j) for i in range(-1,2) for j in range(-1,2)]:
-        
-            object= game_map.interactive_layer[add_coords(self.location,direction)]
-            if object == ((47,1),1): #axe
-                self.item+=2
-                if self.item >5:
-                    self.item =5
+            coordinate=add_coords(self.location,direction)
+            object= tuple(game_map.interactive_layer[coordinate])
+            game_map.interation_logic(coordinate,object,self)
+        print self.item, "item amount"    
+                
+                
                 
                 
         
