@@ -55,7 +55,7 @@ class GameMap:
     
     '''
     def __init__(self):
-        self.background_layer= np.array([[(0,5)]*40]*40)   
+        self.background_layer= np.array([[(5,0)]*40]*40)   
         self.foreground_layer= np.array([[(-1,-1)]*40]*40)
         list1 = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
         for i,j in list1:
