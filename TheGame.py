@@ -277,6 +277,24 @@ def game_loop(game_map,players,status_bar):
             elif keys[pygame.K_d]: direction= (1,0)
             elif keys[pygame.K_a]: direction= (-1,0)
             players[1].move(direction,1,game_map,players)
+
+        if keys[pygame.K_SLASH]:
+        	#player1's interact
+        	players[0].interact(game_map)
+
+        if keys[pygame.K_q]:
+        	#player2's interact
+        	players[1].interact(game_map)
+
+        if keys[pygame.K_GREATER]:
+        	#player1's attack
+        	players[0].damage()
+
+        if keys[pygame.K_1]:
+        	#player2's attack
+        	players[1].damage()
+
+
             
         
         for player in players: 
