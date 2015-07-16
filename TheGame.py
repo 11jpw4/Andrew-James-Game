@@ -37,7 +37,10 @@ char_images = [char_ss.images_at([(17*j, 17*i, 16,16) for i in range(54)],colork
 def main():
     game_map=GameMap()
     print game_map
-    game_loop(game_map)
+    player1=Player(location=(2,2),appearance=(0,0,0,0,0,0))
+    player2=Player(location=(10,30),appearance=(2,0,0,0,0,0))
+    players=[player1,player2]
+    game_loop(game_map,players)
     
 
 class GameMap:
@@ -90,7 +93,7 @@ class Player:
         for _ in range(distance):   
             
             if game_map.is_passable(add_coords(self.location,direction)):
-                game_map.draw_tile(self,coordinate)
+                game_map.draw_tile(self.location)
                 self.location = add_coords(self.location,direction)
                 self.draw_player()
             else:
@@ -99,7 +102,7 @@ class Player:
                 
     def draw_player(self):
         #draw the player and all their items        
-        draw_image_to_coord((0, self.appearance[0]), self.loaction, images_list=char_images) # draw the body
+        draw_image_to_coord((0, self.appearance[0]), self.location, images_list=char_images) # draw the body
         
         
 
@@ -116,9 +119,11 @@ def draw_image_to_coord(img_location, draw_location, images_list=images):
     SURFACE.blit(images_list[img_location[0]][img_location[1]], blit_location)
 
 
-def game_loop(game_map):   
+def game_loop(game_map,players):   
     #this function contain the main game loop
     game_map.draw_all()
+    for player in players: 
+        player.draw_player()
     while True:
     # this is the main game loop
         
@@ -129,9 +134,22 @@ def game_loop(game_map):
         
         keys = pygame.key.get_pressed()  #checking pressed keys
         
-        if keys[pygame.K_d]:
-            pass
-        
+        if keys[pygame.K_UP] or keys[pygame.K_LEFT] or keys[pygame.K_RIGHT] or keys[pygame.K_DOWN]:
+            #player1's movement 
+            if keys[pygame.K_UP]: direction= (0,-1)
+            elif keys[pygame.K_DOWN]: direction= (0,1)
+            elif keys[pygame.K_RIGHT]: direction= (1,0)
+            elif keys[pygame.K_LEFT]: direction= (-1,0)
+            players[0].move(direction,1,game_map)
+            
+            
+        if keys[pygame.K_a] or keys[pygame.K_d] or keys[pygame.K_s] or keys[pygame.K_w]:
+            #player2's movement 
+            if keys[pygame.K_w]: direction= (0,-1)
+            elif keys[pygame.K_s]: direction= (0,1)
+            elif keys[pygame.K_d]: direction= (1,0)
+            elif keys[pygame.K_a]: direction= (-1,0)
+            players[1].move(direction,1,game_map)
         
         pygame.display.flip() # this draws all the updates to the screen
         clock.tick(FPS) 
