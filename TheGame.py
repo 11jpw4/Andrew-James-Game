@@ -103,7 +103,7 @@ class GameMap:
         #redraws the a single tile, blitting over players
         draw_image_to_coord(self.background_layer[coordinate], coordinate)
         if self.foreground_layer[coordinate][0] != -1: draw_image_to_coord (self.foreground_layer[coordinate[0]][coordinate[1]], coordinate)
-        if self.interactive_layer[coordinate][0][0] != -1: draw_image_to_coord (self.foreground_layer[coordinate][0], coordinate,images_list=self.foreground_layer[coordinate][1])
+        if self.interactive_layer[coordinate][0][0] != -1: draw_image_to_coord (self.interactive_layer[coordinate][0], coordinate,images_list=self.interactive_layer[coordinate][1])
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
