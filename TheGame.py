@@ -57,10 +57,12 @@ class GameMap:
     def __init__(self):
         self.background_layer= np.array([[(5,0)]*40]*40)   
         self.foreground_layer= np.array([[(-1,-1)]*40]*40)
-        self.interactive_layer= np.array([[((-1,-1),ss)]*40]*40) #interactive layer also specifies spritesheet
+        self.interactive_layer= np.array([[((-1,-1),images)]*40]*40) #interactive layer also specifies spritesheet
+        
+        self.interactive_layer[20][20]=((47,1),char_images)
         listTrees = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
         listWater = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)]
-        listWaterUpEdge = [(5,31),(6,31),(7,31)]
+        listWaterUpEdge = [(5,31),(6,31),(7,31)] + [(12+i,7) for i in range(4)]
         listWaterDownEdge = [(5,35),(6,35),(7,35)]
         listWaterLeftEdge = [(4,32),(4,33),(4,34)]
         listWaterRightEdge = [(8,32),(8,33),(8,34)]
