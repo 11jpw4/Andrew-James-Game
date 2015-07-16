@@ -4,6 +4,7 @@ import numpy as np
 from pygame.locals import *
 from utilities.spritesheet import spritesheet # for loading the spritesheet
 import os # for paths
+import random
 
 
 '''
@@ -57,9 +58,9 @@ class GameMap:
     def __init__(self):
         self.background_layer= np.array([[(5,0)]*40]*40)   
         self.foreground_layer= np.array([[(-1,-1)]*40]*40)
-        self.interactive_layer= np.array([[((-1,-1),images)]*40]*40) #interactive layer also specifies spritesheet
+        self.interactive_layer= np.array([[((-1,-1),0)]*40]*40) #interactive layer also specifies spritesheet
         
-        self.interactive_layer[20][20]=((47,1),char_images)
+        self.interactive_layer[20][20]=((47,1),1)
         listTrees = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
         listWater = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)]
         listWaterUpEdge = [(5,31),(6,31),(7,31)] + [(12+i,7) for i in range(4)]
@@ -103,7 +104,21 @@ class GameMap:
         #redraws the a single tile, blitting over players
         draw_image_to_coord(self.background_layer[coordinate], coordinate)
         if self.foreground_layer[coordinate][0] != -1: draw_image_to_coord (self.foreground_layer[coordinate[0]][coordinate[1]], coordinate)
-        if self.interactive_layer[coordinate][0][0] != -1: draw_image_to_coord (self.interactive_layer[coordinate][0], coordinate,images_list=self.interactive_layer[coordinate][1])
+        if self.interactive_layer[coordinate][0][0] != -1: 
+            if self.interactive_layer[coordinate][1] ==0: # need to see which spritesheet to blit from
+                draw_image_to_coord (self.interactive_layer[coordinate][0], coordinate)
+            else:
+                draw_image_to_coord (self.interactive_layer[coordinate][0], coordinate,images_list=char_images)
+    
+    def interation_logic(self,coordinate,object_code):
+        #this might get tricky
+        if object_code==((47,1),1):
+            axe_spawns=[(20,20),(35,30),(2,38) ] #MAP_PARAMS
+            self.draw_tile(coordinate)
+            self.interactive_layer[coordinate]=((-1,-1),0)
+            new_spawn=random.choice(axe_spawns)
+            self.interactive_layer[new_spawn]=((47,1),1)
+            self.draw_tile(new_spawn)
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
@@ -164,8 +179,11 @@ class Player:
         for direction in [(i,j) for i in range(-1,2) for j in range(-1,2)]:
         
             object= game_map.interactive_layer[add_coords(self.location,direction)]
-            if object == (5,5): #example
-                self.item+=5
+            if object == ((47,1),1): #axe
+                self.item+=2
+                if self.item >5:
+                    self.item =5
+                
                 
         
 class StatusBar:
