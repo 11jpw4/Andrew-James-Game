@@ -57,9 +57,34 @@ class GameMap:
     def __init__(self):
         self.background_layer= np.array([[(5,0)]*40]*40)   
         self.foreground_layer= np.array([[(-1,-1)]*40]*40)
-        list1 = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
-        for i,j in list1:
+        listTrees = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
+        listWater = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)]
+        listWaterUpEdge = [(5,31),(6,31),(7,31)]
+        listWaterDownEdge = [(5,35),(6,35),(7,35)]
+        listWaterLeftEdge = [(4,32),(4,33),(4,34)]
+        listWaterRightEdge = [(8,32),(8,33),(8,34)]
+        for i,j in listTrees:
         	self.foreground_layer[i][j]=(13,9)
+        for i,j in listWater:
+        	self.foreground_layer[i][j]=(3,1)
+        for i,j in listWaterUpEdge:
+        	self.foreground_layer[i][j]=(3,0)
+        for i,j in listWaterDownEdge:
+        	self.foreground_layer[i][j]=(3,2)
+        for i,j in listWaterLeftEdge:
+        	self.foreground_layer[i][j]=(2,1)
+        for i,j in listWaterRightEdge:
+        	self.foreground_layer[i][j]=(4,1)
+        #Edges
+        self.foreground_layer[4][31]=(2,0)
+        self.foreground_layer[8][31]=(4,0)
+        self.foreground_layer[4][35]=(2,2)
+        self.foreground_layer[8][35]=(4,2)
+
+
+
+
+
 
 
 
@@ -78,6 +103,9 @@ class GameMap:
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
+        listImpassable = [(13,9), (3,1), (3,0), (3,2), (2,1), (4,1), (2,0), (4,0), (2,2), (4,2)]
+        if tuple(self.foreground_layer[coordinate[0]][coordinate[1]]) in listImpassable :
+        	return False
         return True
     
 class Player:
