@@ -18,7 +18,7 @@ import random
 '''
 
 DIMENSIONS=(40,40) 
-DEBUG=False
+DEBUG=0
 SURFACE = pygame.display.set_mode((16*DIMENSIONS[0],16*DIMENSIONS[1]+32)) # each tile is 16 pixels wide additionally two tiles are used for the HUD at the bottom
 
 #this is everything I could have ever asked for and more
@@ -77,15 +77,44 @@ class GameMap:
         list_grass2 = [(22,17),(32,37),(36,21),(4,28),(5,12)]
         list_tall_dg_tree_base=[(4,17),(30,32),(26,31),(21,9),(37,37)]
         list_tall_dg_tree_top=[add_coords(x,(0,-1)) for x in list_tall_dg_tree_base]
-
+        list_tall_pointy_tree_base=[(16,36),(28,37),(36,26),(38,33),(22,34)]
+        list_tall_pointy_tree_top=[add_coords(x,(0,-1)) for x in list_tall_pointy_tree_base]
+        
+        #camp stuff
+        list_white_tent_t_l=[(28,13),(24,14)]
+        list_white_tent_t_r=[(29,13),(25,14)]
+        list_white_tent_b_r=[(29,14),(25,15)]
+        list_white_tent_b_l=[(28,14),(24,15)]
+        list_camp_fire=[(28,16)]
+        list_fish_rope_right=[(27,14)]
+        list_fish_rope_left=[(26,14)]
+        list_sleepingbag1=[(26,16)]
+        
         #lillypads and water stuff
-        list_lillypad1 = [(3,33),(18,13)]
+        list_lillypad1 = [(5,33),(18,13)]
         list_lillypad2 = [(15,8),(10,7)]
         list_water_rock1 = [(17,8)]
-    
         
+        #dirt
+        list_dirt_top_left=[(24,13)]
+        list_dirt_top=[(25+i,13) for i in range(5)]
+        list_dirt_top_right=[(30,13)]
+        list_dirt_middle_left=[(24,15),(24,14)]
+        list_dirt_middle=[(25+i,14+j) for i in range(5) for j in range(3)] +[(30,15)]
+        list_dirt_middle_right=[(30,14),]
+        list_dirt_bottom_left=[(25,17),(24,16)]
+        list_dirt_bottom=[(28,17),(27,17),(26,17)]
+        list_dirt_bottom_right=[(29,17),(30,16)]
+        
+        list_path_horizontal=[(31+i,15) for i in range(4)]+[(36+i,14) for i in range(4)]
+        list_path_bend_bottom_right=[(35,15)]
+        list_path_bend_top_left=[(35,14)]
+        
+        
+        
+          
         # water tiles
-        list_water = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)] +[(15,8),(16,8),(17,8),(17,7),(10,7)]+[(17,8+i) for i in range(4)]
+        list_water = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)] +[(15,8),(16,8),(17,7),(10,7)]+[(17,8+i) for i in range(1,4)]
         list_water_up_edge = [(5,31),(6,31),(7,31)] + [(12+i,7) for i in range(4)]+[(10,6)]
         list_water_down_edge = [(5,35),(6,35),(7,35)] +[(11,8),(12,8),(13,8),(15,9),(10,8),(19,14)]
         list_water_left_edge = [(4,32),(4,33),(4,34)] +[(17,i)for i in range(1,6)]+[(9,7),(16,10),(16,11)]
@@ -98,7 +127,8 @@ class GameMap:
         list_water_bot_right_land_big=[(19,1),(20,14)]
         list_water_top_left_land_big=[(16,6),(17,0),(9,6)]
         list_water_top_right_land_big=[(11,6),(19,12),(20,13)]
-        #desert corner
+        
+        #desert tiles
        	desert_count = 20
         list_desert_tiles=[]
         while desert_count <= 40:
@@ -123,6 +153,10 @@ class GameMap:
         	self.foreground_layer[i][j]=(15,11)
         for i,j in list_tall_dg_tree_top:
         	self.foreground_layer[i][j]=(15,10)
+        for i,j in list_tall_pointy_tree_base:
+        	self.foreground_layer[i][j]=(16,11)
+        for i,j in list_tall_pointy_tree_top:
+        	self.foreground_layer[i][j]=(16,10)
         for i,j in list_bushes:
         	self.foreground_layer[i][j]=(24,10)
         for i,j in list_cacti:
@@ -131,14 +165,58 @@ class GameMap:
         	self.foreground_layer[i][j]=(26,10)
         for i,j in list_cacti3:
         	self.foreground_layer[i][j]=(26,9)
-
+        
+        #dirt
+        for i,j in list_dirt_top_left:
+        	self.background_layer2[i][j]=(7,9)
+        for i,j in list_dirt_top:
+        	self.background_layer2[i][j]=(8,9)
+        for i,j in list_dirt_top_right:
+        	self.background_layer2[i][j]=(9,9)
+        for i,j in list_dirt_middle_left:
+        	self.background_layer2[i][j]=(7,10)
+        for i,j in list_dirt_middle:
+        	self.background_layer2[i][j]=(8,10)
+        for i,j in list_dirt_middle_right:
+        	self.background_layer2[i][j]=(9,10)
+        for i,j in list_dirt_bottom_left:
+        	self.background_layer2[i][j]=(7,11)
+        for i,j in list_dirt_bottom:
+        	self.background_layer2[i][j]=(8,11)
+        for i,j in list_dirt_bottom_right:
+        	self.background_layer2[i][j]=(9,11)  
+        for i,j in list_path_horizontal:
+        	self.background_layer2[i][j]=(9,8)
+        for i,j in list_path_bend_bottom_right:
+        	self.background_layer2[i][j]=(8,8)
+        for i,j in list_path_bend_top_left:
+        	self.background_layer2[i][j]=(7,7)
+        
+        #camp stuff
+        for i,j in list_white_tent_t_l:
+        	self.foreground_layer[i][j]=(48,10)
+        for i,j in list_white_tent_t_r:
+        	self.foreground_layer[i][j]=(49,10)
+        for i,j in list_white_tent_b_r:
+        	self.foreground_layer[i][j]=(49,11)
+        for i,j in list_white_tent_b_l:
+        	self.foreground_layer[i][j]=(48,11)
+        for i,j in list_camp_fire:
+        	self.foreground_layer[i][j]=(15,8)
+        for i,j in list_fish_rope_right:
+        	self.foreground_layer[i][j]=(52,13)
+        for i,j in list_fish_rope_left:
+        	self.foreground_layer[i][j]=(51,13)
+        for i,j in list_sleepingbag1:
+        	self.foreground_layer[i][j]=(12,2)    
+         
         #lillypads and water stuff
         for i,j in list_lillypad1:
         	self.foreground_layer[i][j]=(26,11)
         for i,j in list_lillypad2:
         	self.foreground_layer[i][j]=(25,11)
         for i,j in list_water_rock1:
-        	self.foreground_layer[i][j]=(56,28)
+        	self.foreground_layer[i][j]=(55,23)
         
         #water tiles
         for i,j in list_water:
@@ -239,7 +317,11 @@ class GameMap:
 
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
-        listImpassable = [(13,9), (3,1), (3,0), (3,2), (2,1), (4,1), (2,0), (4,0), (2,2), (4,2), (24,10),(15,11),(15,10),(26,9),(26,10),(22,9)]
+        listImpassable = [(13,9), (3,1), (3,0), (3,2), (2,1), 
+                            (4,1), (2,0), (4,0), (2,2), (4,2), 
+                            (24,10),(15,11),(15,10),(26,9),(26,10),
+                            (22,9),(16,11),(16,10),
+                            (48,10),(48,11),(49,11),(49,10)]
         condition1=tuple(self.foreground_layer[coordinate[0]][coordinate[1]]) in listImpassable
         condition2=tuple(self.background_layer[coordinate[0]][coordinate[1]]) in listImpassable
         condition3=tuple(self.background_layer2[coordinate[0]][coordinate[1]]) in listImpassable
@@ -296,8 +378,7 @@ class Player:
         for direction in [(i,j) for i in range(-1,2) for j in range(-1,2)]:
             coordinate=add_coords(self.location,direction)
             object= tuple(game_map.interactive_layer[coordinate])
-            game_map.interation_logic(coordinate,object,self,players,status_bar)
-        print self.item, "item amount"    
+            game_map.interation_logic(coordinate,object,self,players,status_bar) 
                 
                 
                 
