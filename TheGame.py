@@ -73,11 +73,16 @@ class GameMap:
         list_cacti2 = [(27,5),(35,8)]
         list_cacti3 = [(31,11),(38,6)]
         list_bushes = [(22,38), (24,38), (2,30), (26,24)]
-        list_grass1 = [(15,15),(24,18),(16,36),(24,11)]
+        list_grass1 = [(15,15),(24,18),(16,36),(24,11),(33,18)]
         list_grass2 = [(22,17),(32,37),(36,21),(4,28),(5,12)]
+        list_wild_flower1=[(8,18),(27,28)]
+        list_wild_flower2=[(4,12),(27,10),(31,18)]
+        list_wild_flower3=[(23,17),(13,13),(11,0)]
+        list_wild_flower4=[(23,28),(23,21),(32,17),(15,2),(23,13)]
         list_tall_dg_tree_base=[(4,17),(30,32),(26,31),(21,9),(37,37)]
         list_tall_dg_tree_top=[add_coords(x,(0,-1)) for x in list_tall_dg_tree_base]
-        list_tall_pointy_tree_base=[(16,36),(28,37),(36,26),(38,33),(22,34)]
+        list_tall_pointy_tree_base=[(16,36),(36,26),(38,33),(22,34),(29,36),(28,35),(28,38),(27,36),
+                                    (26,35),(26,37),(27,38),(25,36),(25,34),(25,38),(23,37),(31,37),(26,38)]
         list_tall_pointy_tree_top=[add_coords(x,(0,-1)) for x in list_tall_pointy_tree_base]
         
         #camp stuff
@@ -165,6 +170,14 @@ class GameMap:
         	self.foreground_layer[i][j]=(26,10)
         for i,j in list_cacti3:
         	self.foreground_layer[i][j]=(26,9)
+        for i,j in list_wild_flower1:
+        	self.foreground_layer[i][j]=(28,9)
+        for i,j in list_wild_flower2:
+        	self.foreground_layer[i][j]=(29,9)
+        for i,j in list_wild_flower3:
+        	self.foreground_layer[i][j]=(30,9)
+        for i,j in list_wild_flower4:
+        	self.foreground_layer[i][j]=(31,9)
         
         #dirt
         for i,j in list_dirt_top_left:
