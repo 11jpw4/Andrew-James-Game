@@ -65,7 +65,7 @@ class GameMap:
         
         self.interactive_layer[20][20]=((47,1),1)
 
-        self.interactive_layer[33][11]=((36,3),1)
+        self.interactive_layer[33][11]=((37,4),1)
         
         #trees, bushes and grasses
         list_trees = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
@@ -221,14 +221,14 @@ class GameMap:
             status_bar.update_values(players)
             status_bar.draw_all()
 
-        if object_code==((36,3),1):
+        if object_code==((37,4),1):
             shield_spawns=[(33,11), (15,14), (39,2)]
             
             self.interactive_layer[coordinate]=((-1,-1),0)
             self.draw_tile(coordinate)
             current_spawn2= shield_spawns.index(coordinate)
             new_spawn2=shield_spawns[(current_spawn2+random.randint(1,2))%3]
-            self.interactive_layer[new_spawn2]=((36,3),1)
+            self.interactive_layer[new_spawn2]=((37,4),1)
 
             self.draw_tile(new_spawn2)
             if players[not(player.id-1)].item >= 3:
