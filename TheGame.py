@@ -18,10 +18,12 @@ import random
 '''
 
 DIMENSIONS=(40,40) 
+DEBUG=True
 SURFACE = pygame.display.set_mode((16*DIMENSIONS[0],16*DIMENSIONS[1]+32)) # each tile is 16 pixels wide additionally two tiles are used for the HUD at the bottom
 
 #this is everything I could have ever asked for and more
-
+pygame.init()
+myfont = pygame.font.SysFont("monospace", 10)
 FPS = 30
 clock = pygame.time.Clock()
 SURFACE.fill(pygame.Color('black'))
@@ -57,47 +59,103 @@ class GameMap:
     '''
     def __init__(self):
         self.background_layer= np.array([[(5,0)]*40]*40)   
+        self.background_layer2= np.array([[(0,5)]*40]*40)   
         self.foreground_layer= np.array([[(-1,-1)]*40]*40)
         self.interactive_layer= np.array([[((-1,-1),0)]*40]*40) #interactive layer also specifies spritesheet
         
         self.interactive_layer[20][20]=((47,1),1)
+        
+        #trees, bushes and grasses
         list_trees = [(3,3),(7,5),(11,9),(33,29),(18,22),(32,22)]
-        list_water = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)]
-        list_water_up_edge = [(5,31),(6,31),(7,31)] + [(12+i,7) for i in range(4)]
-        list_water_down_edge = [(5,35),(6,35),(7,35)]
-        list_water_left_edge = [(4,32),(4,33),(4,34)]
-        list_water_right_edge = [(8,32),(8,33),(8,34)]
+        list_cacti = [(27,1),(31,7),(33,4),(37,15),(33,13)]
+        list_cacti2 = [(27,5),(35,8)]
+        list_cacti3 = [(31,11),(38,6)]
         list_bushes = [(22,38), (24,38), (2,30), (26,24)]
+        list_grass1 = [(15,15),(24,18),(16,36),(24,11)]
+        list_grass2 = [(22,17),(32,37),(36,21),(4,28),(5,12)]
+        list_tall_dg_tree_base=[(4,17),(30,32),(26,31)]
+        list_tall_dg_tree_top=[add_coords(x,(0,-1)) for x in list_tall_dg_tree_base]
+
+        
+        # water tiles
+        list_water = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)] +[(15,8),(16,8),(17,8),(17,7),(10,7)]+[(17,8+i) for i in range(4)]
+        list_water_up_edge = [(5,31),(6,31),(7,31)] + [(12+i,7) for i in range(4)]+[(10,6)]
+        list_water_down_edge = [(5,35),(6,35),(7,35)] +[(11,8),(12,8),(13,8),(15,9),(10,8),(19,14)]
+        list_water_left_edge = [(4,32),(4,33),(4,34)] +[(17,i)for i in range(1,6)]+[(9,7),(16,10),(16,11)]
+        list_water_right_edge = [(8,32),(8,33),(8,34)]+[(18,i)for i in range(2,12)]+[(19,0)]
+        list_water_top_right_land_tiny=[(11,7),(18,12),(19,13)]
+        list_water_bot_right_land_tiny=[(18,1)]
+        list_water_top_left_land_tiny=[(16,7),(17,6),(18,0)]
+        list_water_bot_left_land_tiny=[(14,8),(16,9),(17,12),(18,13)]
+        list_water_bot_left_land_big=[(14,9),(9,8),(16,12),(17,13),(18,14)]
+        list_water_bot_right_land_big=[(19,1),(20,14)]
+        list_water_top_left_land_big=[(16,6),(17,0),(9,6)]
+        list_water_top_right_land_big=[(11,6),(19,12),(20,13)]
         #desert corner
        	desert_count = 20
+        list_desert_tiles=[]
         while desert_count <= 40:
-        	list_desert_tiles = [(desert_count+i,0+i) for i in range(15-(desert_count-25))]
-        	for i,j in list_desert_tiles:
-        		self.background_layer[i][j]=(7,2)
-        	desert_count = desert_count + 1
-        list_cacti = [(27,1),(31,7),(33,4),(37,15),(33,13)]
-
+            list_desert_tiles += [(desert_count+i,0+i) for i in range(14-(desert_count-25))]
+            desert_count = desert_count + 1
+        list_desert_tiles += [(39,0+i) for i in range(20)]    
+        for i,j in list_desert_tiles:
+        	self.background_layer[i][j]=(8,22)
+        	
+        desert_bottom_left=[(19+i,i) for i in range(1,21)]
+        for i,j in desert_bottom_left:
+        	self.background_layer2[i][j]=(7,23)
+        
         for i,j in list_trees:
         	self.foreground_layer[i][j]=(13,9)
-        for i,j in list_water:
-        	self.foreground_layer[i][j]=(3,1)
-        for i,j in list_water_up_edge:
-        	self.foreground_layer[i][j]=(3,0)
-        for i,j in list_water_down_edge:
-        	self.foreground_layer[i][j]=(3,2)
-        for i,j in list_water_left_edge:
-        	self.foreground_layer[i][j]=(2,1)
-        for i,j in list_water_right_edge:
-        	self.foreground_layer[i][j]=(4,1)
-        #Edges
-        self.foreground_layer[4][31]=(2,0)
-        self.foreground_layer[8][31]=(4,0)
-        self.foreground_layer[4][35]=(2,2)
-        self.foreground_layer[8][35]=(4,2)
+        for i,j in list_grass1:
+        	self.foreground_layer[i][j]=(22,10)
+        for i,j in list_grass2:
+        	self.foreground_layer[i][j]=(22,11)
+        for i,j in list_tall_dg_tree_base:
+        	self.foreground_layer[i][j]=(15,11)
+        for i,j in list_tall_dg_tree_top:
+        	self.foreground_layer[i][j]=(15,10)
         for i,j in list_bushes:
         	self.foreground_layer[i][j]=(24,10)
         for i,j in list_cacti:
         	self.foreground_layer[i][j]=(22,9)
+        for i,j in list_cacti2:
+        	self.foreground_layer[i][j]=(26,10)
+        for i,j in list_cacti3:
+        	self.foreground_layer[i][j]=(26,11)
+
+        for i,j in list_water:
+        	self.background_layer[i][j]=(3,1)
+        for i,j in list_water_up_edge:
+        	self.background_layer[i][j]=(3,0)
+        for i,j in list_water_down_edge:
+        	self.background_layer[i][j]=(3,2)
+        for i,j in list_water_left_edge:
+        	self.background_layer[i][j]=(2,1)
+        for i,j in list_water_right_edge:
+        	self.background_layer[i][j]=(4,1)
+        for i,j in list_water_top_right_land_tiny:
+        	self.background_layer[i][j]=(0,2)
+        for i,j in list_water_bot_left_land_tiny:
+        	self.background_layer[i][j]=(1,1)
+        for i,j in list_water_bot_right_land_tiny:
+        	self.background_layer[i][j]=(0,1)
+        for i,j in list_water_top_left_land_tiny:
+        	self.background_layer[i][j]=(1,2)
+        for i,j in list_water_bot_left_land_big:
+        	self.background_layer[i][j]=(2,2)
+        for i,j in list_water_top_left_land_big:
+        	self.background_layer[i][j]=(2,0)
+        for i,j in list_water_bot_right_land_big:
+        	self.background_layer[i][j]=(4,2)
+        for i,j in list_water_top_right_land_big:
+        	self.background_layer[i][j]=(4,0)
+        #Edges
+        self.background_layer[4][31]=(2,0)
+        self.background_layer[8][31]=(4,0)
+        self.background_layer[4][35]=(2,2)
+        self.background_layer[8][35]=(4,2)
+
         
 
 
@@ -118,6 +176,8 @@ class GameMap:
     def draw_tile(self,coordinate):
         #redraws the a single tile, blitting over players
         draw_image_to_coord(self.background_layer[coordinate], coordinate)
+        draw_image_to_coord(self.background_layer2[coordinate], coordinate)
+        
         if self.foreground_layer[coordinate][0] != -1: draw_image_to_coord (self.foreground_layer[coordinate[0]][coordinate[1]], coordinate)
         if self.interactive_layer[coordinate][0][0] != -1: 
             if self.interactive_layer[coordinate][1] ==0: # need to see which spritesheet to blit from
@@ -146,8 +206,11 @@ class GameMap:
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
-        listImpassable = [(13,9), (3,1), (3,0), (3,2), (2,1), (4,1), (2,0), (4,0), (2,2), (4,2), (24,10)]
-        if tuple(self.foreground_layer[coordinate[0]][coordinate[1]]) in listImpassable :
+        listImpassable = [(13,9), (3,1), (3,0), (3,2), (2,1), (4,1), (2,0), (4,0), (2,2), (4,2), (24,10),(15,11),(15,10),(26,11),(26,10),(22,9)]
+        condition1=tuple(self.foreground_layer[coordinate[0]][coordinate[1]]) in listImpassable
+        condition2=tuple(self.background_layer[coordinate[0]][coordinate[1]]) in listImpassable
+        condition3=tuple(self.background_layer2[coordinate[0]][coordinate[1]]) in listImpassable
+        if  condition1 or condition2 or condition3:
         	return False
         return True
     
@@ -205,8 +268,18 @@ class Player:
                 
                 
                 
-                
-        
+def debug_grid():
+    
+    for i in range(DIMENSIONS[0]):
+        pygame.draw.line(SURFACE,pygame.Color("black"),(16*i,0),(16*i,640))
+        pygame.draw.line(SURFACE,pygame.Color("black"),(0,16*i),(640,16*i))
+    for i in range(DIMENSIONS[0]):
+        for j in range(DIMENSIONS[1]):
+            label_x = myfont.render(str(i), 1,pygame.Color("black"))
+            label_y = myfont.render(str(j), 1,pygame.Color("black"))
+            SURFACE.blit(label_x, (16*i+2, 16*j-1))
+            SURFACE.blit(label_y, (16*i+2, 16*j+6))
+     
 class StatusBar:
     def __init__(self,players):
         self.update_values(players)
@@ -304,10 +377,12 @@ def draw_image_to_coord(img_location, draw_location, images_list=images):
 
 
 def game_loop(game_map,players,status_bar):   
+    
     #this function contain the main game loop
     game_map.draw_all()
     status_bar.draw_all()
     while True:
+        if DEBUG:debug_grid()
     # this is the main game loop
         
         for event in pygame.event.get():
@@ -342,9 +417,8 @@ def game_loop(game_map,players,status_bar):
         	#player2's interact
         	players[1].interact(game_map,status_bar,players)
 
-        if keys[pygame.K_GREATER]:
+        if keys[pygame.K_PERIOD]:
         	#player1's attack
-            print "sdasd"
             players[0].damage(players, status_bar)
 
         if keys[pygame.K_1]:
