@@ -18,7 +18,7 @@ import random
 '''
 
 DIMENSIONS=(40,40) 
-DEBUG=True
+DEBUG=False
 SURFACE = pygame.display.set_mode((16*DIMENSIONS[0],16*DIMENSIONS[1]+32)) # each tile is 16 pixels wide additionally two tiles are used for the HUD at the bottom
 
 #this is everything I could have ever asked for and more
@@ -73,9 +73,14 @@ class GameMap:
         list_bushes = [(22,38), (24,38), (2,30), (26,24)]
         list_grass1 = [(15,15),(24,18),(16,36),(24,11)]
         list_grass2 = [(22,17),(32,37),(36,21),(4,28),(5,12)]
-        list_tall_dg_tree_base=[(4,17),(30,32),(26,31)]
+        list_tall_dg_tree_base=[(4,17),(30,32),(26,31),(21,9),(37,37)]
         list_tall_dg_tree_top=[add_coords(x,(0,-1)) for x in list_tall_dg_tree_base]
 
+        #lillypads and water stuff
+        list_lillypad1 = [(3,33),(18,13)]
+        list_lillypad2 = [(15,8),(10,7)]
+        list_water_rock1 = [(17,8)]
+    
         
         # water tiles
         list_water = [(5,34),(6,34),(7,34),(5,33),(6,33),(7,33),(5,32),(6,32),(7,32)] +[(15,8),(16,8),(17,8),(17,7),(10,7)]+[(17,8+i) for i in range(4)]
@@ -105,6 +110,7 @@ class GameMap:
         for i,j in desert_bottom_left:
         	self.background_layer2[i][j]=(7,23)
         
+        #trees and cacti
         for i,j in list_trees:
         	self.foreground_layer[i][j]=(13,9)
         for i,j in list_grass1:
@@ -122,8 +128,17 @@ class GameMap:
         for i,j in list_cacti2:
         	self.foreground_layer[i][j]=(26,10)
         for i,j in list_cacti3:
-        	self.foreground_layer[i][j]=(26,11)
+        	self.foreground_layer[i][j]=(26,9)
 
+        #lillypads and water stuff
+        for i,j in list_lillypad1:
+        	self.foreground_layer[i][j]=(26,11)
+        for i,j in list_lillypad2:
+        	self.foreground_layer[i][j]=(25,11)
+        for i,j in list_water_rock1:
+        	self.foreground_layer[i][j]=(56,28)
+        
+        #water tiles
         for i,j in list_water:
         	self.background_layer[i][j]=(3,1)
         for i,j in list_water_up_edge:
@@ -206,7 +221,7 @@ class GameMap:
     
     def is_passable(self,coordinate):
         #tests to see if the tile in question is passable
-        listImpassable = [(13,9), (3,1), (3,0), (3,2), (2,1), (4,1), (2,0), (4,0), (2,2), (4,2), (24,10),(15,11),(15,10),(26,11),(26,10),(22,9)]
+        listImpassable = [(13,9), (3,1), (3,0), (3,2), (2,1), (4,1), (2,0), (4,0), (2,2), (4,2), (24,10),(15,11),(15,10),(26,9),(26,10),(22,9)]
         condition1=tuple(self.foreground_layer[coordinate[0]][coordinate[1]]) in listImpassable
         condition2=tuple(self.background_layer[coordinate[0]][coordinate[1]]) in listImpassable
         condition3=tuple(self.background_layer2[coordinate[0]][coordinate[1]]) in listImpassable
