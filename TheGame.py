@@ -81,7 +81,7 @@ class GameMap:
         list_wild_flower4=[(23,28),(23,21),(32,17),(15,2),(23,13)]
         list_tall_dg_tree_base=[(4,17),(30,32),(26,31),(21,9),(37,37)]
         list_tall_dg_tree_top=[add_coords(x,(0,-1)) for x in list_tall_dg_tree_base]
-        list_tall_pointy_tree_base=[(16,36),(36,26),(38,33),(22,34),(29,36),(28,35),(28,38),(27,36),
+        list_tall_pointy_tree_base=[(16,36),(38,33),(22,34),(29,36),(28,35),(28,38),(27,36),
                                     (26,35),(26,37),(27,38),(25,36),(25,34),(25,38),(23,37),(31,37),(26,38)]
         list_tall_pointy_tree_top=[add_coords(x,(0,-1)) for x in list_tall_pointy_tree_base]
         
@@ -558,9 +558,30 @@ def game_loop(game_map,players,status_bar):
         for player in players: 
             #redraw the players each frame
             player.draw_player()
+        if not players[0].health or not players[1].health:
+            #check for victory
+            break
         
         pygame.display.flip() # this draws all the updates to the screen
         clock.tick(FPS) 
+    
+    myfont = pygame.font.SysFont("monospace", 10)
+    if players[0].health==0:
+        label= myfont.render("PLAYER 2 WINS", 1,pygame.Color("black"))
+        pygame.draw.rect(SURFACE,pygame.Color("white"),(220,240,200,40))
+        SURFACE.blit(label, (280,255))
+    else:   
+        label= myfont.render("PLAYER 1 WINS", 1,pygame.Color("black"))
+        pygame.draw.rect(SURFACE,pygame.Color("white"),(220,240,200,40))
+        SURFACE.blit(label, (280,255))
+        pygame.display.flip() # this draws all the updates to the screen
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+        clock.tick(FPS) 
+    
     
 if __name__ == "__main__":
     main()
