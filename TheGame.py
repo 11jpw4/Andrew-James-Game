@@ -181,6 +181,21 @@ class GameMap:
         desert_bottom_left=[(19+i,i) for i in range(1,21)]
         for i,j in desert_bottom_left:
         	self.background_layer2[i][j]=(7,23)
+
+        #railroad tiles
+        list_railroad =[]
+        list_railroad += [(1,0+i) for i in range(25)]
+        list_railroad += [(14,26+i) for i in range(14)]
+        for i,j in list_railroad:
+            self.foreground_layer[i][j]=(44,19)
+        list_railroad2 =[]
+        list_railroad2 = [(2+i,25) for i in range(12)]
+        for i,j in list_railroad2:
+            self.foreground_layer[i][j]=(44,18)
+        #Leftturn, rightturn, cart
+        self.foreground_layer[1][25]=(41,19)
+        self.foreground_layer[14][25]=(42,18)
+        self.foreground_layer[1][5]=(51,18)
         
         #trees and cacti
         for i,j in list_trees:
