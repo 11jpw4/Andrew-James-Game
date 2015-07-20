@@ -415,12 +415,13 @@ class GameMap:
             status_bar.draw_all()
 
         if object_code==((37,4),1):# shield
-            shield_spawns=[(33,11), (15,14), (39,2)]
+            shield_spawns=[(33,11), (15,14), (39,2), (29,31), (1,26), (7,33)]
             
             self.interactive_layer[coordinate]=((-1,-1),0)
             self.draw_tile(coordinate)
             current_spawn2= shield_spawns.index(coordinate)
-            new_spawn2=shield_spawns[(current_spawn2+random.randint(1,2))%3]
+            spawn_count2=len(shield_spawns)
+            new_spawn2=shield_spawns[(current_spawn2+random.randint(1,spawn_count2-1))%spawn_count2]
             self.interactive_layer[new_spawn2]=((37,4),1)
 
             self.draw_tile(new_spawn2)
