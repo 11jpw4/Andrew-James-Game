@@ -190,14 +190,14 @@ class GameMap:
         list_railroad += [(1,0+i) for i in range(25)]
         list_railroad += [(14,26+i) for i in range(14)]
         for i,j in list_railroad:
-            self.foreground_layer[i][j]=(44,19)
+            self.background_layer2[i][j]=(44,19)
         list_railroad2 =[]
         list_railroad2 = [(2+i,25) for i in range(12)]
         for i,j in list_railroad2:
-            self.foreground_layer[i][j]=(44,18)
+            self.background_layer2[i][j]=(44,18)
         #Leftturn, rightturn, cart
-        self.foreground_layer[1][25]=(41,19)
-        self.foreground_layer[14][25]=(42,18)
+        self.background_layer2[1][25]=(41,19)
+        self.background_layer2[14][25]=(42,18)
         self.foreground_layer[1][5]=(51,18)
         
         #trees and cacti
@@ -529,15 +529,18 @@ class Player:
                 #break out of the loop if the player encounters an obstacle 
                 break
                 
-    def draw_player(self):
-        #draw the player and all their items        
-        draw_image_to_coord((0, self.appearance[0]), self.location, images_list=char_images) # draw the body
-        '''draw_image_to_coord((3, self.appearance[1]), self.location, images_list=char_images)  #draw the pants
-        draw_image_to_coord((4, self.appearance[2]), self.location, images_list=char_images)  #draw the shoes
-        draw_image_to_coord((6+self.appearance[3]%12, self.appearance[3]/12), self.location, images_list=char_images)  #draw the shirt
-        draw_image_to_coord((19+self.appearance[4]%8, self.appearance[4]/8), self.location, images_list=char_images)  #draw the hair1
-        draw_image_to_coord((19+self.appearance[5]%8, self.appearance[5]/8), self.location, images_list=char_images)  #draw the hair2 TO_DO add in the white hair'''
-        
+    def draw_player(self,game_map):
+        #draw the player and all their items  
+        if self.health:
+            draw_image_to_coord((0, self.appearance[0]), self.location, images_list=char_images) # draw the body
+            '''draw_image_to_coord((3, self.appearance[1]), self.location, images_list=char_images)  #draw the pants
+            draw_image_to_coord((4, self.appearance[2]), self.location, images_list=char_images)  #draw the shoes
+            draw_image_to_coord((6+self.appearance[3]%12, self.appearance[3]/12), self.location, images_list=char_images)  #draw the shirt
+            draw_image_to_coord((19+self.appearance[4]%8, self.appearance[4]/8), self.location, images_list=char_images)  #draw the hair1
+            draw_image_to_coord((19+self.appearance[5]%8, self.appearance[5]/8), self.location, images_list=char_images)  #draw the hair2 TO_DO add in the white hair'''
+        else: 
+            game_map.draw_tile(self.location)
+            draw_image_to_coord((52,10), self.location)
     
     def interact(self,game_map,status_bar,players):
         #interact with the map
@@ -782,12 +785,12 @@ def game_loop(game_map,players,status_bar):
         if keys[pygame.K_SLASH] and p1_interact_cooldown<0:
         	#player1's interact
             players[0].interact(game_map,status_bar,players)
-            p1_interact_cooldown=30
+            p1_interact_cooldown=15
 
         if keys[pygame.K_q] and p2_interact_cooldown<0:
         	#player2's interact
             players[1].interact(game_map,status_bar,players)
-            p2_interact_cooldown=30
+            p2_interact_cooldown=15
 
         if keys[pygame.K_PERIOD]and p1_attack_cooldown<0:
         	#player1's attack
@@ -813,7 +816,7 @@ def game_loop(game_map,players,status_bar):
         
         for player in players: 
             #redraw the players each frame
-            player.draw_player()
+            player.draw_player(game_map)
         if not players[0].health or not players[1].health:
             #check for victory
             break
