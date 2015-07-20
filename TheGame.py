@@ -29,12 +29,21 @@ FPS = 30
 clock = pygame.time.Clock()
 SURFACE.fill(pygame.Color('black'))
 
+
+# --- load in images ---
 ss = spritesheet(os.path.join('spritesheet/roguelikeSheet_transparent.png'))
 char_ss = spritesheet(os.path.join('spritesheet/roguelikeChar_transparent.png'))
 # Sprite is 16x16 pixels at location 0,0 in the file...
 # Load  images into an array, their transparent bit is (255, 255, 255)
 images = [ss.images_at([(17*j, 17*i, 16,16) for i in range(36)],colorkey=(255, 255, 255)) for j in range(57)]
 char_images = [char_ss.images_at([(17*j, 17*i, 16,16) for i in range(12)],colorkey=(255, 255, 255)) for j in range(54)]
+
+# --- Load in sounds ---
+pygame.mixer.init()
+sound_attack_p1 =pygame.mixer.Sound("sounds\OOT_YoungLink_Attack1.wav")
+sound_attack_p2 =pygame.mixer.Sound("sounds\OOT_YoungLink_Attack3.wav")
+sound_hurt =pygame.mixer.Sound("sounds\OOT_AdultLink_Hurt1.wav")
+sound_death =pygame.mixer.Sound("sounds\OOT_YoungLink_Scream1.wav")
 
 
 
@@ -474,16 +483,19 @@ class Player:
         self.item= 0
    
     def damage(self, players, status_bar):
-		other_player = players[not(self.id-1)]
-		if self.item:
-			x_dis = abs(other_player.location[0] - self.location[0])
-			y_dis = abs(other_player.location[1] - self.location[1])
-			if x_dis + y_dis <= 4:
-				self.item -= 1
-				other_player.health -= 1
-				status_bar.update_values(players)
-				status_bar.draw_all()
-
+        other_player = players[not(self.id-1)]
+        if self.item:
+            x_dis = abs(other_player.location[0] - self.location[0])
+            y_dis = abs(other_player.location[1] - self.location[1])
+            if x_dis + y_dis <= 4:
+                self.item -= 1
+                other_player.health -= 1
+                sound_hurt.play()
+                status_bar.update_values(players)
+                status_bar.draw_all()
+        if self.id ==1: sound_attack_p1.play()
+        elif self.id ==2: sound_attack_p2.play()
+        
 
 
     def move(self,direction,distance,game_map,players,npc_list):
@@ -549,6 +561,7 @@ class Npc:
                     victim_dist=distances[1]
                     
             if  victim_dist <3:
+            
                     self.damage(players,status_bar,victim)
             directions=((1,0),(-1,0),(0,1),(0,-1))
             coords=map(lambda x: add_coords(x,self.location), directions)
@@ -567,6 +580,7 @@ class Npc:
         y_dis = abs(victim.location[1] - self.location[1])
         if x_dis + y_dis <= 4:
             victim.health -= 1
+            sound_hurt.play()
             status_bar.update_values(players)
             status_bar.draw_all()
     
@@ -710,8 +724,10 @@ def game_loop(game_map,players,status_bar):
     game_map.draw_all()
     status_bar.draw_all()
     
-    p1_cooldown=10
-    p2_cooldown=10
+    p1_interact_cooldown=10
+    p1_attack_cooldown=10
+    p2_interact_cooldown=10
+    p2_attack_cooldown=10
     counter=0
     orc=Npc(location=(20,20),appearance=(3,0,0,80,20,0),id=1,type=0)
     npc_list=[orc]
@@ -744,23 +760,25 @@ def game_loop(game_map,players,status_bar):
             elif keys[pygame.K_a]: direction= (-1,0)
             players[1].move(direction,1,game_map,players,npc_list)
 
-        if keys[pygame.K_SLASH] and p1_cooldown<0:
+        if keys[pygame.K_SLASH] and p1_interact_cooldown<0:
         	#player1's interact
             players[0].interact(game_map,status_bar,players)
-            p1_cooldown=30
+            p1_interact_cooldown=30
 
-        if keys[pygame.K_q] and p2_cooldown<0:
+        if keys[pygame.K_q] and p2_interact_cooldown<0:
         	#player2's interact
             players[1].interact(game_map,status_bar,players)
-            p2_cooldown=30
+            p2_interact_cooldown=30
 
-        if keys[pygame.K_PERIOD]:
+        if keys[pygame.K_PERIOD]and p1_attack_cooldown<0:
         	#player1's attack
             players[0].damage(players, status_bar)
+            p1_attack_cooldown=15
 
-        if keys[pygame.K_1]:
+        if keys[pygame.K_1]and p2_attack_cooldown<0:
         	#player2's attack
-        	players[1].damage(players, status_bar)
+            players[1].damage(players, status_bar)
+            p2_attack_cooldown=15
 
 
         #---animations---
@@ -782,14 +800,17 @@ def game_loop(game_map,players,status_bar):
             break
         
         
-        p1_cooldown-=1
-        p2_cooldown-=1
+        p1_interact_cooldown-=1
+        p1_attack_cooldown-=1
+        p2_interact_cooldown-=1
+        p2_attack_cooldown-=1
         
         
         pygame.display.flip() # this draws all the updates to the screen
         clock.tick(FPS) 
     
     #end of game loop
+    sound_death.play()
     
     myfont = pygame.font.SysFont("monospace", 10)
     if players[0].health==0:
