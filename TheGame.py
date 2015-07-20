@@ -5,7 +5,7 @@ from pygame.locals import *
 from utilities.spritesheet import spritesheet # for loading the spritesheet
 import os # for paths
 import random
-
+import math
 
 '''
     -RULES-
@@ -17,10 +17,11 @@ import random
      
 '''
 
+
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (30,30) # set where the window open on the screen
 DIMENSIONS=(40,40) 
 DEBUG=0
 SURFACE = pygame.display.set_mode((16*DIMENSIONS[0],16*DIMENSIONS[1]+32)) # each tile is 16 pixels wide additionally two tiles are used for the HUD at the bottom
-
 #this is everything I could have ever asked for and more
 pygame.init()
 myfont = pygame.font.SysFont("monospace", 10)
@@ -485,12 +486,13 @@ class Player:
 
 
 
-    def move(self,direction,distance,game_map,players):
+    def move(self,direction,distance,game_map,players,npc_list):
         #moves the player in the direction desired if possible
         #direction is a tuple either (1,0),(-1,0),(0,1) or (0,-1)
         for _ in range(distance):   
             destination=add_coords(self.location,direction)
-            if game_map.is_passable(destination) and  players[not(self.id-1)].location!=destination: #check to see if movement is valid
+            no_npcs_in_tile= not sum([npc.location==destination for npc in npc_list])
+            if game_map.is_passable(destination) and  players[not(self.id-1)].location!=destination and no_npcs_in_tile: #check to see if movement is valid
                 game_map.draw_tile(self.location)
                 self.location = add_coords(self.location,direction)
             else:
@@ -522,6 +524,64 @@ class Npc:
         self.appearance=appearance
         self.id=id
         self.type=type
+        self.target=0
+    
+    def npc_logic(self,players,status_bar,game_map,npc_list):
+        # npc ai handled here
+    
+        if self.type==0: # aggressive 
+            # this ai will chases a player if it has a target, if not it will chase the closest player , ah and try to hurt them
+            raw_distances=[(abs(-self.location[0]+players[0].location[0]),abs(players[0].location[1]-self.location[1])),
+                            (abs(-self.location[0]+players[1].location[0]),abs(players[1].location[1]-self.location[1]))]
+            distances= [math.sqrt(raw_distances[0][0]**2+raw_distances[0][1]**2),math.sqrt(raw_distances[1][0]**2+raw_distances[1][1]**2)]
+            
+                
+            if self.target:
+                victim=players[self.target-1]
+                victim_dist=distances[self.target-1]
+            else:
+                
+                if distances[0]<distances[1]:
+                    victim=players[0]
+                    victim_dist=distances[0]
+                else:
+                    victim=players[1]
+                    victim_dist=distances[1]
+                    
+            if  victim_dist <3:
+                    self.damage(players,status_bar,victim)
+            directions=((1,0),(-1,0),(0,1),(0,-1))
+            coords=map(lambda x: add_coords(x,self.location), directions)
+            raw_dists=map(lambda x: (abs(-x[0]+victim.location[0]),abs(-x[1]+victim.location[1])),coords)
+            dists=map(lambda x: abs(x[0])+abs(x[1]) , raw_dists)
+            
+            direction= directions[dists.index(min(dists))]
+            self.move(direction,1,game_map,players,npc_list)
+            
+               
+
+            
+    def damage(self, players, status_bar,victim):
+		
+        x_dis = abs(victim.location[0] - self.location[0])
+        y_dis = abs(victim.location[1] - self.location[1])
+        if x_dis + y_dis <= 4:
+            victim.health -= 1
+            status_bar.update_values(players)
+            status_bar.draw_all()
+    
+    def move(self,direction,distance,game_map,players,npc_list):
+        #moves the player in the direction desired if possible
+        #direction is a tuple either (1,0),(-1,0),(0,1) or (0,-1)
+        for _ in range(distance):   
+            destination=add_coords(self.location,direction)
+            no_npcs_in_tile= not sum([npc.location==destination for npc in npc_list])
+            if game_map.is_passable(destination) and  players[not(self.id-1)].location!=destination and no_npcs_in_tile: #check to see if movement is valid
+                game_map.draw_tile(self.location)
+                self.location = add_coords(self.location,direction)
+            else:
+                #break out of the loop if the player encounters an obstacle 
+                break
     
     def draw_npc(self):
         #draws the npc
@@ -653,6 +713,8 @@ def game_loop(game_map,players,status_bar):
     p1_cooldown=10
     p2_cooldown=10
     counter=0
+    orc=Npc(location=(20,20),appearance=(3,0,0,80,20,0),id=1,type=0)
+    npc_list=[orc]
     
     while True:
         if DEBUG:debug_grid()
@@ -671,7 +733,7 @@ def game_loop(game_map,players,status_bar):
             elif keys[pygame.K_DOWN]: direction= (0,1)
             elif keys[pygame.K_RIGHT]: direction= (1,0)
             elif keys[pygame.K_LEFT]: direction= (-1,0)
-            players[0].move(direction,1,game_map,players)
+            players[0].move(direction,1,game_map,players,npc_list)
             
             
         if keys[pygame.K_a] or keys[pygame.K_d] or keys[pygame.K_s] or keys[pygame.K_w]:
@@ -680,7 +742,7 @@ def game_loop(game_map,players,status_bar):
             elif keys[pygame.K_s]: direction= (0,1)
             elif keys[pygame.K_d]: direction= (1,0)
             elif keys[pygame.K_a]: direction= (-1,0)
-            players[1].move(direction,1,game_map,players)
+            players[1].move(direction,1,game_map,players,npc_list)
 
         if keys[pygame.K_SLASH] and p1_cooldown<0:
         	#player1's interact
@@ -701,9 +763,16 @@ def game_loop(game_map,players,status_bar):
         	players[1].damage(players, status_bar)
 
 
-        #animations
+        #---animations---
         counter=(counter+1)%150
         game_map.animate(counter)    
+        
+        
+        #--- Npc stuff ---
+        if counter%5==0:
+            orc.npc_logic(players,status_bar,game_map,npc_list)
+            orc.draw_npc()
+        
         
         for player in players: 
             #redraw the players each frame
@@ -720,6 +789,8 @@ def game_loop(game_map,players,status_bar):
         pygame.display.flip() # this draws all the updates to the screen
         clock.tick(FPS) 
     
+    #end of game loop
+    
     myfont = pygame.font.SysFont("monospace", 10)
     if players[0].health==0:
         label= myfont.render("PLAYER 2 WINS", 1,pygame.Color("black"))
@@ -729,7 +800,10 @@ def game_loop(game_map,players,status_bar):
     pygame.draw.rect(SURFACE,pygame.Color("black"),(220,240,200,40),2)
     SURFACE.blit(label, (280,255))
     pygame.display.flip() # this draws all the updates to the screen
+    
+    
     while True:
+        #end of game
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
