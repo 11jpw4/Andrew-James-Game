@@ -40,6 +40,9 @@ char_images = [char_ss.images_at([(17*j, 17*i, 16,16) for i in range(12)],colork
 
 # --- Load in sounds ---
 pygame.mixer.init()
+
+music_1= pygame.mixer.music.load("sounds\music1.mp3")
+pygame.mixer.music.set_volume(0.8)
 sound_attack_p1 =pygame.mixer.Sound("sounds\OOT_YoungLink_Attack1.wav")
 sound_attack_p2 =pygame.mixer.Sound("sounds\OOT_YoungLink_Attack3.wav")
 sound_hurt =pygame.mixer.Sound("sounds\OOT_AdultLink_Hurt1.wav")
@@ -720,6 +723,7 @@ def draw_image_to_coord(img_location, draw_location, images_list=images):
 
 def game_loop(game_map,players,status_bar):   
     
+    pygame.mixer.music.play(loops=-1)
     #this function contain the main game loop
     game_map.draw_all()
     status_bar.draw_all()
@@ -811,6 +815,9 @@ def game_loop(game_map,players,status_bar):
     
     #end of game loop
     sound_death.play()
+    music_victory= pygame.mixer.music.load("sounds\win1.mp3")
+    pygame.mixer.music.play()
+    
     
     myfont = pygame.font.SysFont("monospace", 10)
     if players[0].health==0:
