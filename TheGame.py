@@ -742,7 +742,7 @@ def draw_image_to_coord(img_location, draw_location, images_list=images):
 
 def game_loop(game_map,players,status_bar):   
     
-    pygame.mixer.music.play(loops=-1)
+    pygame.mixer.music.play(-1)
     #this function contain the main game loop
     game_map.draw_all()
     status_bar.draw_all()
